@@ -40,9 +40,10 @@ else:
 
         SPREADSHEET_TITLE = 'Planilha com Tabela Dinâmica'
         DATA_SHEET_TITLE = 'Dados'
-        PIVOT_SHEET_TITLE = 'Tabela Dinâmica'
-        DIVERGENCIA_SHEET_TITLE = 'Divergência'
-        DIVERGENCIA_TOTAL_SHEET_TITLE = 'Divergência Total'
+        PIVOT_PROMPTS_SHEET_TITLE = 'Tabela Dinâmica - Divergência entre prompts'
+        PIVOT_IA_HU_SHEET_TITLE = 'Tabela Dinâmica - Divergência entre IA e HU'
+        DIVERGENCIA_SHEET_TITLE = 'Divergência por competência'
+        DIVERGENCIA_TOTAL_SHEET_TITLE = 'Divergência Total entre PROMPTS'
 
         with st.spinner("🔄 Lendo dados do Excel..."):
             df1 = pd.read_excel(ARQUIVO_ORIGEM, sheet_name=ABA1, skiprows=0)
@@ -62,7 +63,8 @@ else:
                 'properties': {'title': SPREADSHEET_TITLE},
                 'sheets': [
                     {'properties': {'title': DATA_SHEET_TITLE}},
-                    {'properties': {'title': PIVOT_SHEET_TITLE}},
+                    {'properties': {'title': PIVOT_PROMPTS_SHEET_TITLE}},
+                    {'properties': {'title': PIVOT_IA_HU_SHEET_TITLE}},
                 ]
             }
 
@@ -86,9 +88,10 @@ else:
             spreadsheet_info = sheets_service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
             sheets = spreadsheet_info['sheets']
             sheet_id_dados = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == DATA_SHEET_TITLE)
-            sheet_id_pivot = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == PIVOT_SHEET_TITLE)
+            sheet_id_pivot_prompts = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == PIVOT_PROMPTS_SHEET_TITLE)
+            sheet_id_pivot_ia_hu = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == PIVOT_IA_HU_SHEET_TITLE)
 
-        with st.spinner("📊 Criando Tabela Dinâmica..."):
+        with st.spinner("📊 Criando Tabela Dinâmica - Divergência entre PROMPTS"):
             requests = [{
                 "updateCells": {
                     "rows": [{
@@ -112,10 +115,10 @@ else:
                                     "sortOrder": "ASCENDING"
                                 }],
                                 "values": [
-                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 2},
-                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 3},
-                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 4},
-                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 5}
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 5},
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 9},
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 13},
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 17}
                                 ],
                                 "criteria": {
                                     "1": {
@@ -125,7 +128,54 @@ else:
                             }
                         }]
                     }],
-                    "start": {"sheetId": sheet_id_pivot, "rowIndex": 2, "columnIndex": 0},
+                    "start": {"sheetId": sheet_id_pivot_prompts, "rowIndex": 2, "columnIndex": 0},
+                    "fields": "pivotTable"
+                }
+            }]
+
+            sheets_service.spreadsheets().batchUpdate(
+                spreadsheetId=spreadsheet_id,
+                body={"requests": requests}
+            ).execute()
+        
+        with st.spinner("📊 Criando Tabela Dinâmica - Divergência entre IA e HU"):
+            requests = [{
+                "updateCells": {
+                    "rows": [{
+                        "values": [{
+                            "pivotTable": {
+                                "source": {
+                                    "sheetId": sheet_id_dados,
+                                    "startRowIndex": 0,
+                                    "startColumnIndex": 0,
+                                    "endRowIndex": len(values),
+                                    "endColumnIndex": len(values[0])
+                                },
+                                "rows": [{
+                                    "sourceColumnOffset": 0,
+                                    "showTotals": True,
+                                    "sortOrder": "ASCENDING"
+                                }],
+                                "columns": [{
+                                    "sourceColumnOffset": 1,
+                                    "showTotals": False,
+                                    "sortOrder": "ASCENDING"
+                                }],
+                                "values": [
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 8},
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 12},
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 16},
+                                    {"summarizeFunction": "SUM", "sourceColumnOffset": 20}
+                                ],
+                                "criteria": {
+                                    "1": {
+                                        "visibleValues": list(df_combinado['Nome do Prompt'].unique())
+                                    }
+                                }
+                            }
+                        }]
+                    }],
+                    "start": {"sheetId": sheet_id_pivot_ia_hu, "rowIndex": 2, "columnIndex": 0},
                     "fields": "pivotTable"
                 }
             }]
