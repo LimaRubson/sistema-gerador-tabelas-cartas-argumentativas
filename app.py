@@ -13,7 +13,7 @@ st.sidebar.header("📁 Upload de Arquivos")
 excel_file = st.sidebar.file_uploader("Arquivo Excel (.xlsx)", type=["xlsx"])
 
 # Carrega as credenciais do secrets
-service_account_info = json.loads(st.secrets["GOOGLE_SERVICE_ACCOUNT"])
+service_account_info = st.secrets["GOOGLE_SERVICE_ACCOUNT"]
 credentialsl = service_account.Credentials.from_service_account_info(service_account_info)
 
 # Verifica se o arquivo de credenciais existe na raiz
