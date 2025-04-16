@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+import json
 import os
 
 st.set_page_config(page_title="Gerador de Tabela Dinâmica - Carta Argumentativa", layout="wide")
@@ -10,6 +11,10 @@ st.title("📊 Gerador de Tabela Dinâmica - Carta Argumentativa")
 # --- Upload do arquivo Excel ---
 st.sidebar.header("📁 Upload de Arquivos")
 excel_file = st.sidebar.file_uploader("Arquivo Excel (.xlsx)", type=["xlsx"])
+
+# Carrega as credenciais do secrets
+service_account_info = json.loads(st.secrets["GOOGLE_SERVICE_ACCOUNT"])
+credentialsl = service_account.Credentials.from_service_account_info(service_account_info)
 
 # Verifica se o arquivo de credenciais existe na raiz
 CREDENTIALS_PATH = "credentials.json"
@@ -48,7 +53,7 @@ else:
 
         # Autenticação
         SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-        creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPES)
+        credentialsl.with_scopes(SCOPES)
         sheets_service = build('sheets', 'v4', credentials=creds)
         drive_service = build('drive', 'v3', credentials=creds)
 
