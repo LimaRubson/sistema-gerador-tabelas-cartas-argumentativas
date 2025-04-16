@@ -54,8 +54,8 @@ else:
         # Autenticação
         SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
         credentialsl.with_scopes(SCOPES)
-        sheets_service = build('sheets', 'v4', credentials=creds)
-        drive_service = build('drive', 'v3', credentials=creds)
+        sheets_service = build('sheets', 'v4', credentials=credentialsl)
+        drive_service = build('drive', 'v3', credentials=credentialsl)
 
         with st.spinner("📁 Criando planilha no Google Sheets..."):
             spreadsheet_body = {
