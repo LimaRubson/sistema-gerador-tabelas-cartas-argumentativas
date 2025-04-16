@@ -5,6 +5,8 @@ from googleapiclient.discovery import build
 import json
 import os
 
+from tables import table_div_comp
+
 st.set_page_config(page_title="Gerador de Tabela Dinâmica - Carta Argumentativa", layout="wide")
 st.title("📊 Gerador de Tabela Dinâmica - Carta Argumentativa")
 
@@ -44,6 +46,7 @@ else:
         PIVOT_IA_HU_SHEET_TITLE = 'Tabela Dinâmica - Divergência entre IA e HU'
         DIVERGENCIA_SHEET_TITLE = 'Divergência por competência'
         DIVERGENCIA_TOTAL_SHEET_TITLE = 'Divergência Total entre PROMPTS'
+        PIVOT_DIV_COMP_SHEET_TITLE = 'Tabela Dinâmica - Divergência por competência IA e HU'
 
         with st.spinner("🔄 Lendo dados do Excel..."):
             df1 = pd.read_excel(ARQUIVO_ORIGEM, sheet_name=ABA1, skiprows=0)
@@ -65,6 +68,7 @@ else:
                     {'properties': {'title': DATA_SHEET_TITLE}},
                     {'properties': {'title': PIVOT_PROMPTS_SHEET_TITLE}},
                     {'properties': {'title': PIVOT_IA_HU_SHEET_TITLE}},
+                    {'properties': {'title': PIVOT_DIV_COMP_SHEET_TITLE}},
                 ]
             }
 
@@ -90,7 +94,8 @@ else:
             sheet_id_dados = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == DATA_SHEET_TITLE)
             sheet_id_pivot_prompts = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == PIVOT_PROMPTS_SHEET_TITLE)
             sheet_id_pivot_ia_hu = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == PIVOT_IA_HU_SHEET_TITLE)
-
+            sheet_id_pivot_div_comp = next(s['properties']['sheetId'] for s in sheets if s['properties']['title'] == PIVOT_DIV_COMP_SHEET_TITLE)
+            
         with st.spinner("📊 Criando Tabela Dinâmica - Divergência entre PROMPTS"):
             requests = [{
                 "updateCells": {
@@ -184,6 +189,8 @@ else:
                 spreadsheetId=spreadsheet_id,
                 body={"requests": requests}
             ).execute()
+        
+        table_div_comp(sheet_id_dados, df_combinado, sheet_id_pivot_div_comp, values, sheets_service, spreadsheet_id)
 
         with st.spinner("🧮 Calculando divergências..."):
             prompts = df_combinado['Nome do Prompt'].unique()
