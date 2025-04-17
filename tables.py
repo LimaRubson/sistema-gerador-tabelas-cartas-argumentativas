@@ -70,7 +70,7 @@ def table_div_comp(sheet_id_dados, df_combinado, sheet_id_pivot_div_comp, values
                             }
                         }]
                     }],
-                    "start": {"sheetId": sheet_id_pivot_div_comp, "rowIndex": 12, "columnIndex": 0},
+                    "start": {"sheetId": sheet_id_pivot_div_comp, "rowIndex": 2, "columnIndex": 4},
                     "fields": "pivotTable"
                 }
             },
@@ -106,7 +106,7 @@ def table_div_comp(sheet_id_dados, df_combinado, sheet_id_pivot_div_comp, values
                             }
                         }]
                     }],
-                    "start": {"sheetId": sheet_id_pivot_div_comp, "rowIndex": 22, "columnIndex": 0},
+                    "start": {"sheetId": sheet_id_pivot_div_comp, "rowIndex": 11, "columnIndex": 0},
                     "fields": "pivotTable"
                 }
             },
@@ -142,7 +142,7 @@ def table_div_comp(sheet_id_dados, df_combinado, sheet_id_pivot_div_comp, values
                             }
                         }]
                     }],
-                    "start": {"sheetId": sheet_id_pivot_div_comp, "rowIndex": 32, "columnIndex": 0},
+                    "start": {"sheetId": sheet_id_pivot_div_comp, "rowIndex": 11, "columnIndex": 4},
                     "fields": "pivotTable"
                 }
             }
